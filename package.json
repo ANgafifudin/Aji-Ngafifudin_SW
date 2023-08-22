@@ -5,7 +5,7 @@
   "scripts": {
     "nodemon": "nodemon --expose-gc ./bin/www",
     "dev-win": "set DEBUG=express:* & nodemon  --expose-gc./bin/www",
-    "dev": "DEBUG=express:* nodemon --expose-gc ./bin/www",
+    "dev": "set DEBUG=express:* & nodemon --expose-gc ./bin/www",
     "start": "node --expose-gc ./bin/www",
     "test": "jest --forceExit --detectOpenHandles --runInBand"
   },
@@ -19,11 +19,13 @@
     ]
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.5",
     "date-and-time": "^0.14.2",
     "debug": "~2.6.9",
-    "ejs": "~2.5.7",
+    "ejs": "^3.1.9",
     "escape-html": "^1.0.3",
     "exceljs": "^4.3.0",
     "express": "~4.17.1",
@@ -37,18 +39,22 @@
     "hashids": "^1.2.2",
     "http-errors": "~1.6.2",
     "jest": "^27.0.4",
+    "joi": "^17.9.2",
     "json5": "^2.1.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.1",
     "lodash": "^4.17.12",
     "mariadb": "^2.5.2",
     "morgan": "~1.9.0",
     "node-cron": "^3.0.2",
-    "node-fetch": "2.6.6",
-    "node-forge": "^0.10.0",
+    "node-fetch": "^2.6.13",
+    "node-forge": "^1.3.1",
     "on-finished": "^2.3.0",
     "qrcode": "^1.4.4",
     "winston": "^3.2.1",
-    "xlsx": "^0.16.9",
+    "xlsx": "^0.18.5",
     "xlsx-populate": "^1.21.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
