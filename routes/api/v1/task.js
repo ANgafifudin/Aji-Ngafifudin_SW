@@ -1,10 +1,10 @@
 const express = require('express');
+const config = require(`${__config_dir}/app.config.json`);
 const router = express.Router();
 const helper = require(__class_dir + '/helper.class.js');
 const m$task = require(__module_dir + '/task.module.js');
-const jwt = require('jsonwebtoken');  // Import jwt module
+const jwt = require('jsonwebtoken');
 
-// Middleware to verify JWT token
 function verifyToken(req, res, next) {
     const token = req.headers['authorization'];
 
@@ -16,7 +16,7 @@ function verifyToken(req, res, next) {
         if (err) {
             return helper.sendErrorResponse(res, 'Unauthorized', 403);
         }
-        req.userId = decoded.userId;  // Use userId from decoded JWT payload
+        req.userId = decoded.userId;
         next();
     });
 }
@@ -26,24 +26,22 @@ router.post('/', verifyToken, async function (req, res, next) {
         items: req.body.items
     };
 
-    // Add userId to the new task object
     newTask.userId = req.userId;
 
-    const addTask = await m$task.add(newTask);
+    const addTask = await m$task.add(newTask, req.userId);
     helper.sendResponse(res, addTask);
 });
 
 router.get('/', verifyToken, async function (req, res, next) {
-    // Use userId from req.userId to fetch tasks specific to the user
     const tasks = await m$task.getAllByUserId(req.userId);
     helper.sendResponse(res, tasks);
 });
 
 router.get('/:id', verifyToken, async function (req, res, next) {
     const taskId = req.params.id;
-    const task = await m$task.getById(taskId);
+    const task = await m$task.getById(taskId, req.userId);
 
-    if (!task || task.userId !== req.userId) {
+    if (!task) {
         return helper.sendErrorResponse(res, 'Task not found', 404);
     }
 
@@ -57,7 +55,7 @@ router.put('/:id', verifyToken, async function (req, res, next) {
         items: req.body.items
     };
 
-    const updateResult = await m$task.update(updatedTask);
+    const updateResult = await m$task.update(updatedTask, req.userId);
 
     if (updateResult.success) {
         helper.sendResponse(res, updateResult.message);
@@ -68,7 +66,7 @@ router.put('/:id', verifyToken, async function (req, res, next) {
 
 router.delete('/:id', verifyToken, async function (req, res, next) {
     const taskId = req.params.id;
-    const deleteResult = await m$task.remove(taskId);
+    const deleteResult = await m$task.remove(taskId, req.userId);
 
     if (deleteResult.success) {
         helper.sendResponse(res, deleteResult.message);

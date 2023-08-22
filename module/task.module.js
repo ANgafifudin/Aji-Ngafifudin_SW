@@ -4,13 +4,10 @@ const mysql = new (require(`${__class_dir}/mariadb.class.js`))(config.db);
 const Joi = require('joi');
 
 class _task {
-    // ...
-
-    // Add data with userId
     add(data, userId) {
-        // Validate data
         const schema = Joi.object({
-            items: Joi.string().required()
+            items: Joi.string().required(),
+            userId: Joi.number().required() // Add validation for userId
         }).options({
             abortEarly: false
         });
@@ -26,10 +23,9 @@ class _task {
             };
         }
 
-        // Insert data to database with userId
         const sql = {
             query: `INSERT INTO task (items, user_id) VALUES (?, ?)`,
-            params: [data.items, userId]
+            params: [data.items, data.userId] // Use data.userId here
         };
 
         return mysql.query(sql.query, sql.params)
@@ -50,7 +46,6 @@ class _task {
             });
     }
 
-    // Get all tasks for a specific user
     getAllByUserId(userId) {
         const sql = {
             query: `SELECT * FROM task WHERE user_id = ?`,
@@ -75,7 +70,92 @@ class _task {
             });
     }
 
-    // ...
+    getById(taskId, userId) {
+        const sql = {
+            query: `SELECT * FROM task WHERE id = ? AND user_id = ?`,
+            params: [taskId, userId]
+        };
+
+        return mysql.query(sql.query, sql.params)
+            .then(result => {
+                if (result.length === 0) {
+                    return null;
+                }
+                return {
+                    status: true,
+                    data: result[0]
+                };
+            })
+            .catch(error => {
+                if (debug) {
+                    console.error('get task by ID Error: ', error);
+                }
+                return {
+                    status: false,
+                    error
+                };
+            });
+    }
+
+    update(data, userId) {
+        const sql = {
+            query: `UPDATE task SET items = ? WHERE id = ? AND user_id = ?`,
+            params: [data.items, data.id, userId]
+        };
+
+        return mysql.query(sql.query, sql.params)
+            .then(result => {
+                if (result.affectedRows === 0) {
+                    return {
+                        success: false,
+                        message: 'Task not found'
+                    };
+                }
+                return {
+                    success: true,
+                    message: 'Task updated successfully'
+                };
+            })
+            .catch(error => {
+                if (debug) {
+                    console.error('update task Error: ', error);
+                }
+                return {
+                    success: false,
+                    message: 'An error occurred while updating the task'
+                };
+            });
+    }
+
+    remove(taskId, userId) {
+        const sql = {
+            query: `DELETE FROM task WHERE id = ? AND user_id = ?`,
+            params: [taskId, userId]
+        };
+
+        return mysql.query(sql.query, sql.params)
+            .then(result => {
+                if (result.affectedRows === 0) {
+                    return {
+                        success: false,
+                        message: 'Task not found'
+                    };
+                }
+                return {
+                    success: true,
+                    message: 'Task deleted successfully'
+                };
+            })
+            .catch(error => {
+                if (debug) {
+                    console.error('delete task Error: ', error);
+                }
+                return {
+                    success: false,
+                    message: 'An error occurred while deleting the task'
+                };
+            });
+    }
 }
 
 module.exports = new _task();

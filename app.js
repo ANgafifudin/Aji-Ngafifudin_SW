@@ -145,40 +145,28 @@ for (const mainRoute in routers) {
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-	//if it's api request, return json instead
-	if(req.headers['content-type'] == 'application/json' || (req.headers['authorization'] && req.headers['authorization'].toLowerCase().includes('bearer '))){
-		res.status(404).send({
-			status: false,
-			error: "Sorry can't find this route!"
-		});
-
-		if(config.debug){
-			next(createError(404));
-		}
-
-		return;
-	} else {
-		next(createError(404));
-	}
+    // Check if it's an API request or contains authorization header
+    if (req.headers['content-type'] === 'application/json' || (req.headers['authorization'] && req.headers['authorization'].toLowerCase().includes('bearer '))) {
+        res.status(404).json({
+            status: false,
+            error: "Sorry can't find this route!"
+        });
+    } else {
+        next(createError(404));
+    }
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-	if(config.debug === 2 || config.debug === 'verbose'){
-		console.error('This one is not found -->',req.method, req.originalUrl, err);
-	}
+    if (config.debug === 2 || config.debug === 'verbose') {
+        console.error('This one is not found -->', req.method, req.originalUrl, err);
+    }
 
-	//simply redirect to default page if route not found
-	//~ if(req.originalUrl == '/' || req.originalUrl == '/'+urlWebsite || req.originalUrl == '/'+urlWebsite+'/' ){
-	// if(req.session.profile){
-	// 	res.redirect(__publicurl+'/404/notfound');
-	// } else {
-	// 	res.redirect(__publicurl+'/404');
-	// }
-	res.status(404).send({
-		status: false,
-		error: "Sorry can't find this route!"
-	});
+    // Simply redirect to default page if route not found
+    res.status(404).send({
+        status: false,
+        error: "Sorry can't find this route!"
+    });
 });
 
 module.exports = {
